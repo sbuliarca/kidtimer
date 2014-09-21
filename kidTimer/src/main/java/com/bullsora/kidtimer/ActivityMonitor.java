@@ -19,21 +19,33 @@ public class ActivityMonitor {
     "com.bullsora.kidtimer"
   );
 
-  public void fetchCurrentActivity(Context context) {
+  public static void fetchCurrentActivity(Context context) {
     ActivityManager
         activityManager =
         (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
     List<ActivityManager.RunningTaskInfo> runningTasks = activityManager.getRunningTasks(TASKS);
-    String topActivityName = runningTasks.get(0).baseActivity.getPackageName();
-    Log.i("ActivityMonitor", "Top activity is: " + topActivityName);
+    String topTaskPackage = runningTasks.get(0).baseActivity.getPackageName();
+    Log.i("ActivityMonitor", "Top activity is: " + topTaskPackage);
 
-    if (topActivityName.startsWith("com.android.mms")) {
-      Log.i("ActivityMonitor", "Block mms");
-      Intent intent = new Intent(context, MainActivity.class);
-      intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-      context.startActivity(intent);
+    if (EXCLUDED_TASKS.contains(topTaskPackage)) {
+      return;
     }
+
+//    SharedPreferences usage = context.getSharedPreferences("Usage", 0);
+//    SharedPreferences.Editor usageEditor = usage.edit();
+//    usageEditor.pu
+//
+    if (topTaskPackage.startsWith("com.android.mms")) {
+      blockUsage(context, topTaskPackage);
+    }
+  }
+
+  private static void blockUsage(Context context, String topActivityName) {
+    Log.i("ActivityMonitor", "Block " + topActivityName);
+    Intent intent = new Intent(context, MainActivity.class);
+    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+    context.startActivity(intent);
   }
 
 

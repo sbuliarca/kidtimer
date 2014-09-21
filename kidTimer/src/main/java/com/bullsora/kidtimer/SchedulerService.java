@@ -30,13 +30,11 @@ public class SchedulerService extends IntentService {
 
   private Handler repeatingScheduler = new Handler();
 
-  private ActivityMonitor activityMonitor = new ActivityMonitor();
-
   private Runnable getCurrentAppTask = new Runnable() {
     @Override
     public void run() {
 
-      activityMonitor.fetchCurrentActivity(SchedulerService.this);
+      ActivityMonitor.fetchCurrentActivity(SchedulerService.this);
 
       repeatingScheduler.postDelayed(getCurrentAppTask, ActivityMonitor.SCHEDULE_PERIOD);
     }

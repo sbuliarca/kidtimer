@@ -7,11 +7,9 @@ import android.content.Intent;
 public class AlarmReceiver extends BroadcastReceiver {
 
 
-  private final ActivityMonitor activityMonitor = new ActivityMonitor();
-
   @Override
   public void onReceive(Context context, Intent intent) {
-    activityMonitor.fetchCurrentActivity(context);
+    ActivityMonitor.fetchCurrentActivity(context);
   }
 
 }
