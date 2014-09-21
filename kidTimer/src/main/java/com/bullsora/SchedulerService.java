@@ -1,20 +1,12 @@
 package com.bullsora;
 
-import android.app.ActivityManager;
 import android.app.IntentService;
-import android.app.Service;
 import android.content.Intent;
 import android.os.Handler;
-import android.os.IBinder;
 import android.util.Log;
-
-import java.util.List;
 
 public class SchedulerService extends IntentService {
 
-
-  public static final int TASKS = 1;
-  public static final int SCHEDULE_PERIOD = 2 * 1000;
 
   private static SchedulerService instance = null;
 
@@ -38,14 +30,15 @@ public class SchedulerService extends IntentService {
 
   private Handler repeatingScheduler = new Handler();
 
+  private ActivityMonitor activityMonitor = new ActivityMonitor();
 
   private Runnable getCurrentAppTask = new Runnable() {
     @Override
     public void run() {
 
-      fetchCurrentActivity();
+      activityMonitor.fetchCurrentActivity(SchedulerService.this);
 
-      repeatingScheduler.postDelayed(getCurrentAppTask, SCHEDULE_PERIOD);
+      repeatingScheduler.postDelayed(getCurrentAppTask, ActivityMonitor.SCHEDULE_PERIOD);
     }
   };
 
@@ -55,21 +48,6 @@ public class SchedulerService extends IntentService {
 
   public SchedulerService() {
     super("KidsScheduler");
-  }
-
-  private void fetchCurrentActivity() {
-    ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-    List<ActivityManager.RunningTaskInfo> runningTasks = activityManager.getRunningTasks(TASKS);
-    String topActivityName = runningTasks.get(0).baseActivity.getPackageName();
-    Log.i("Scheduler", "Top activity is: " + topActivityName);
-
-    if (topActivityName.startsWith("com.android.mms")) {
-      Log.i("Shceduler", "Block mms");
-      Intent intent = new Intent(this, MainActivity.class);
-      intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-      startActivity(intent);
-    }
   }
 
   @Override

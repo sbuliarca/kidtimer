@@ -1,24 +1,22 @@
 package com.bullsora;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.content.Context;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
-import android.widget.ArrayAdapter;
-import android.widget.TextView;
 
 
 public class MainActivity extends ActionBarActivity
@@ -34,15 +32,28 @@ public class MainActivity extends ActionBarActivity
    */
   private CharSequence mTitle;
 
+  private PendingIntent pendingIntent;
+
+  private AlarmManager alarmManager;
+
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
-    if (!SchedulerService.isInstanceCreated()) {
+    alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+
+    Intent alarmIntent = new Intent(this, AlarmReceiver.class);
+    pendingIntent = PendingIntent.getBroadcast(this, 0, alarmIntent, 0);
+
+    alarmManager.cancel(pendingIntent);
+    alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), ActivityMonitor.SCHEDULE_PERIOD, pendingIntent);
+
+  /*  if (!SchedulerService.isInstanceCreated()) {
       startService(new Intent(this, SchedulerService.class));
     }
-
+*/
     mNavigationDrawerFragment = (NavigationDrawerFragment)
         getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
     mTitle = getTitle();

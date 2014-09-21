@@ -18,6 +18,7 @@
             </intent-filter>
         </activity>
 
+        <receiver android:name=".AlarmReceiver"/>
         <service
             android:name="com.bullsora.SchedulerService"
             android:enabled="true"
