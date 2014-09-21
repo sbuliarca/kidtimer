@@ -1,4 +1,4 @@
-package com.bullsora;
+package com.bullsora.kidtimer;
 
 import android.app.Activity;
 import android.app.AlarmManager;

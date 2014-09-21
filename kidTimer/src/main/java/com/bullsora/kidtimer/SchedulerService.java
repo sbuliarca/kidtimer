@@ -1,4 +1,4 @@
-package com.bullsora;
+package com.bullsora.kidtimer;
 
 import android.app.IntentService;
 import android.content.Intent;

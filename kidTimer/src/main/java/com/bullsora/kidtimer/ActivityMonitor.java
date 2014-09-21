@@ -1,4 +1,4 @@
-package com.bullsora;
+package com.bullsora.kidtimer;
 
 import android.app.ActivityManager;
 import android.content.Context;
@@ -6,13 +6,18 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class ActivityMonitor {
 
   public static final int TASKS = 1;
-  public static final int SCHEDULE_PERIOD = 2 * 1000;
+  public static final int SCHEDULE_PERIOD = 1000;
 
+  private static List<String> EXCLUDED_TASKS = Arrays.asList(
+    "com.android.launcher",
+    "com.bullsora.kidtimer"
+  );
 
   public void fetchCurrentActivity(Context context) {
     ActivityManager
