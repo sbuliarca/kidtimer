@@ -34,7 +34,7 @@ public class SchedulerService extends IntentService {
     @Override
     public void run() {
 
-      ActivityMonitor.fetchCurrentActivity(SchedulerService.this);
+      ActivityMonitor.checkUsage(SchedulerService.this);
 
       repeatingScheduler.postDelayed(getCurrentAppTask, ActivityMonitor.SCHEDULE_PERIOD * 1000);
     }

@@ -32,8 +32,6 @@ public class MainActivity extends ActionBarActivity
    */
   private CharSequence mTitle;
 
-  private PendingIntent pendingIntent;
-
   private AlarmManager alarmManager;
 
 
@@ -44,11 +42,22 @@ public class MainActivity extends ActionBarActivity
 
     alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
 
-    Intent alarmIntent = new Intent(this, AlarmReceiver.class);
-    pendingIntent = PendingIntent.getBroadcast(this, 0, alarmIntent, 0);
+    Intent usageIntend = new Intent(this, UsageReceiver.class);
+    usageIntend.setAction(ActivityMonitor.USAGE_ACTION);
+    PendingIntent usagePendingIntent = PendingIntent.getBroadcast(this, 0, usageIntend, 0);
 
-    alarmManager.cancel(pendingIntent);
-    alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), ActivityMonitor.SCHEDULE_PERIOD * 1000, pendingIntent);
+    alarmManager.cancel(usagePendingIntent);
+    alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), ActivityMonitor.SCHEDULE_PERIOD * 1000,
+                              usagePendingIntent);
+
+    Intent scheduleIntent = new Intent(this, UsageReceiver.class);
+    scheduleIntent.setAction(ActivityMonitor.SCHEDULE_ACTION);
+    PendingIntent schedulePendingIntent = PendingIntent.getBroadcast(this, 0, scheduleIntent, 0);
+
+    alarmManager.cancel(schedulePendingIntent);
+    alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), 5 * 1000,
+                              schedulePendingIntent);
+
 
   /*  if (!SchedulerService.isInstanceCreated()) {
       startService(new Intent(this, SchedulerService.class));
