@@ -48,7 +48,7 @@ public class MainActivity extends ActionBarActivity
     pendingIntent = PendingIntent.getBroadcast(this, 0, alarmIntent, 0);
 
     alarmManager.cancel(pendingIntent);
-    alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), ActivityMonitor.SCHEDULE_PERIOD, pendingIntent);
+    alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), ActivityMonitor.SCHEDULE_PERIOD * 1000, pendingIntent);
 
   /*  if (!SchedulerService.isInstanceCreated()) {
       startService(new Intent(this, SchedulerService.class));

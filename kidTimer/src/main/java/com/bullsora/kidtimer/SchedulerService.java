@@ -36,7 +36,7 @@ public class SchedulerService extends IntentService {
 
       ActivityMonitor.fetchCurrentActivity(SchedulerService.this);
 
-      repeatingScheduler.postDelayed(getCurrentAppTask, ActivityMonitor.SCHEDULE_PERIOD);
+      repeatingScheduler.postDelayed(getCurrentAppTask, ActivityMonitor.SCHEDULE_PERIOD * 1000);
     }
   };
 
