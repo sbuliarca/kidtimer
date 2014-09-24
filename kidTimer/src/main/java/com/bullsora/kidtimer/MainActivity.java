@@ -32,37 +32,14 @@ public class MainActivity extends ActionBarActivity
    */
   private CharSequence mTitle;
 
-  private AlarmManager alarmManager;
-
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    Log.i("" + this, "Created main activ");
+
     setContentView(R.layout.activity_main);
 
-    alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
-
-    Intent usageIntend = new Intent(this, UsageReceiver.class);
-    usageIntend.setAction(ActivityMonitor.USAGE_ACTION);
-    PendingIntent usagePendingIntent = PendingIntent.getBroadcast(this, 0, usageIntend, 0);
-
-    alarmManager.cancel(usagePendingIntent);
-    alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), ActivityMonitor.SCHEDULE_PERIOD * 1000,
-                              usagePendingIntent);
-
-    Intent scheduleIntent = new Intent(this, UsageReceiver.class);
-    scheduleIntent.setAction(ActivityMonitor.SCHEDULE_ACTION);
-    PendingIntent schedulePendingIntent = PendingIntent.getBroadcast(this, 0, scheduleIntent, 0);
-
-    alarmManager.cancel(schedulePendingIntent);
-    alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), 5 * 1000,
-                              schedulePendingIntent);
-
-
-  /*  if (!SchedulerService.isInstanceCreated()) {
-      startService(new Intent(this, SchedulerService.class));
-    }
-*/
     mNavigationDrawerFragment = (NavigationDrawerFragment)
         getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
     mTitle = getTitle();
@@ -76,13 +53,13 @@ public class MainActivity extends ActionBarActivity
   @Override
   protected void onPause() {
     super.onPause();
-    Log.i("MainActiv", "Paused main activ");
+    Log.i("" + this, "Paused main activ");
   }
 
   @Override
   protected void onResume() {
     super.onResume();
-    Log.i("MainActiv", "Resumed main activ");
+    Log.i("" + this, "Resumed main activ");
   }
 
   @Override

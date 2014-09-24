@@ -100,7 +100,7 @@ public class ActivityMonitor {
 
     Calendar calendar = Calendar.getInstance();
     calendar.set(Calendar.HOUR_OF_DAY, 8);
-    calendar.set(Calendar.MINUTE, 12);
+    calendar.set(Calendar.MINUTE, 10);
 
     long stopUsageAt = calendar.getTimeInMillis();
 
