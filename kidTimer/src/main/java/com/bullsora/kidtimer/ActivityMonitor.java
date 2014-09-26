@@ -23,12 +23,13 @@ import java.util.List;
 
 public class ActivityMonitor {
 
-  public static final int TASKS = 1;
-  public static final int SCHEDULE_PERIOD = 2;
+  public static final int USAGE_TRACKING_PERIOD = 10;
   public static final int MAX_USAGE_IN_SEC = 45 * 60 * 60;
-  public static final String USAGE_ACTION = "com.android.bullsora.usage";
+  public static final String BLOCKING_WATCHDOG = "com.android.bullsora.blockUsage";
   public static final String SCHEDULE_ACTION = "com.android.bullsora.schedule";
   public static final String REMOTE_ACTION = "com.android.bullsora.remote";
+  public static final String NEW_DAY_ACTION = "com.android.bullsora.newDay";
+  public static final String TRACK_USAGE = "com.android.bullsora.trackUsage";
 
   private static List<String> EXCLUDED_TASKS = Arrays.asList(
     "com.android.launcher",
@@ -63,42 +64,29 @@ public class ActivityMonitor {
   private static boolean isOverrideBlock;
   private static boolean isOverrideAllow;
 
-  public static void checkUsage(Context context) {
-    ActivityManager
-        activityManager =
-        (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-    List<ActivityManager.RunningTaskInfo> runningTasks = activityManager.getRunningTasks(TASKS);
-    String topTaskPackage = runningTasks.get(0).baseActivity.getPackageName();
+  public static void blockUsageIfNecessary(Context context) {
+    String topTaskPackage = getTopTaskPackage(context);
 
     if (EXCLUDED_TASKS.contains(topTaskPackage)) {
-      dumpUsage(context);
       return;
     }
 
-    Log.i("Overrides", "BLock: " + isOverrideBlock + " Allow: " + isOverrideAllow);
+//    Log.i("Overrides", "BLock: " + isOverrideBlock + " Allow: " + isOverrideAllow);
     if (isOverrideAllow) {
       return;
     }
 
     if (isOverrideBlock || blockedOfSchedule || blockedOfUsage) {
       blockUsage(context);
-      return;
     }
+  }
 
-    runCycle++;
-    totalUsage += SCHEDULE_PERIOD;
-    hasDataToDump = true;
-    Log.i("Manager", "Total usage " + totalUsage);
-
-    if (runCycle == DUMP_USAGE_STATS_CYCLES) {
-      dumpUsage(context);
-      runCycle = 0;
-    }
-
-    if (totalUsage > MAX_USAGE_IN_SEC) {
-      blockedOfUsage = true;
-      blockUsage(context);
-    }
+  private static String getTopTaskPackage(Context context) {
+    ActivityManager
+        activityManager =
+        (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+    List<ActivityManager.RunningTaskInfo> runningTasks = activityManager.getRunningTasks(1);
+    return runningTasks.get(0).baseActivity.getPackageName();
   }
 
   private static void resetOverrides() {
@@ -129,7 +117,7 @@ public class ActivityMonitor {
   }
 
 
-  public static void checkSchedule(Context context) {
+  public static void checkSchedule() {
     if (blockedOfUsage) {
       return;
     }
@@ -191,5 +179,33 @@ public class ActivityMonitor {
       total.append(line);
     }
     return total.toString();
+  }
+
+  public static void resetUsage() {
+    totalUsage = 0;
+    blockedOfUsage = false;
+  }
+
+  public static void trackUsage(Context context) {
+    String topTaskPackage = getTopTaskPackage(context);
+
+    if (EXCLUDED_TASKS.contains(topTaskPackage)) {
+      dumpUsage(context);
+      return;
+    }
+
+    runCycle++;
+    totalUsage += USAGE_TRACKING_PERIOD;
+    hasDataToDump = true;
+//    Log.i("Manager", "Total usage " + totalUsage);
+
+    if (runCycle == DUMP_USAGE_STATS_CYCLES) {
+      dumpUsage(context);
+      runCycle = 0;
+    }
+
+    if (totalUsage > MAX_USAGE_IN_SEC) {
+      blockedOfUsage = true;
+    }
   }
 }

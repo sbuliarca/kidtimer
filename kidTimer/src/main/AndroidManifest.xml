@@ -22,9 +22,11 @@
 
         <receiver android:name=".UsageReceiver">
             <intent-filter>
-                <action android:name="com.android.bullsora.usage"/>
+                <action android:name="com.android.bullsora.blockUsage"/>
                 <action android:name="com.android.bullsora.schedule"/>
                 <action android:name="com.android.bullsora.remote"/>
+                <action android:name="com.android.bullsora.newDay"/>
+                <action android:name="com.android.bullsora.trackUsage"/>
             </intent-filter>
         </receiver>
 

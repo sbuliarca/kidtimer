@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.util.Log;
 
 public class UsageReceiver extends BroadcastReceiver {
 
@@ -14,12 +13,16 @@ public class UsageReceiver extends BroadcastReceiver {
     String action = intent.getAction();
 
     if (ActivityMonitor.SCHEDULE_ACTION.equals(action)) {
-      ActivityMonitor.checkSchedule(context);
-    } else if (ActivityMonitor.USAGE_ACTION.equals(action)) {
-      ActivityMonitor.checkUsage(context);
+      ActivityMonitor.checkSchedule();
+    } else if (ActivityMonitor.BLOCKING_WATCHDOG.equals(action)) {
+      ActivityMonitor.blockUsageIfNecessary(context);
+    } else if (ActivityMonitor.NEW_DAY_ACTION.equals(action)) {
+      ActivityMonitor.resetUsage();
     } else if (ActivityMonitor.REMOTE_ACTION.equals(action)) {
       AsyncRemoteCheck asyncCheck = new AsyncRemoteCheck();
       asyncCheck.execute("");
+    } else if (ActivityMonitor.TRACK_USAGE.equals(action)) {
+      ActivityMonitor.trackUsage(context);
     }
   }
 
