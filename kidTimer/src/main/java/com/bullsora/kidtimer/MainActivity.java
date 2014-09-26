@@ -39,7 +39,7 @@ public class MainActivity extends ActionBarActivity
     Log.i("" + this, "Created main activ");
 
     setContentView(R.layout.activity_main);
-//    StartupReceiver.startTasks(this);
+    StartupReceiver.startTasks(this);
 
     mNavigationDrawerFragment = (NavigationDrawerFragment)
         getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);

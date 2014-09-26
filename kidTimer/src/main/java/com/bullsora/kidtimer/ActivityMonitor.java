@@ -33,7 +33,8 @@ public class ActivityMonitor {
 
   private static List<String> EXCLUDED_TASKS = Arrays.asList(
     "com.android.launcher",
-    "com.bullsora.kidtimer"
+    "com.bullsora.kidtimer",
+    "com.nick.kitkatlauncher"
   );
 
   private static String LAST_TASK_NAME;
@@ -66,7 +67,7 @@ public class ActivityMonitor {
 
   public static void blockUsageIfNecessary(Context context) {
     String topTaskPackage = getTopTaskPackage(context);
-
+    Log.i("monitor", "Top package is " + topTaskPackage);
     if (EXCLUDED_TASKS.contains(topTaskPackage)) {
       return;
     }
@@ -148,7 +149,7 @@ public class ActivityMonitor {
       }
 
     } catch (Exception e) {
-      Log.e("ActivityMonitor", "Error while fetching the remote overrides", e);
+//      Log.e("ActivityMonitor", "Error while fetching the remote overrides", e);
     }
   }
 
