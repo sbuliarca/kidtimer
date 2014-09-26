@@ -13,24 +13,29 @@ public class StartupReceiver extends BroadcastReceiver {
   public void onReceive(Context context, Intent intent) {
 
     Log.i("" + this, "Received boot event");
+    startTasks(context);
+  }
+
+  public static void startTasks(Context context) {
     AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
-    Intent usageIntend = new Intent(context, UsageReceiver.class);
-    usageIntend.setAction(ActivityMonitor.USAGE_ACTION);
-    PendingIntent usagePendingIntent = PendingIntent.getBroadcast(context, 0, usageIntend, 0);
+    /*  schedule usage monitor for 2 secs */
+    scheduleAlarmWithAction(context, alarmManager, ActivityMonitor.SCHEDULE_PERIOD * 1000,
+                            ActivityMonitor.USAGE_ACTION);
 
-    alarmManager.cancel(usagePendingIntent);
-    alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
-                              ActivityMonitor.SCHEDULE_PERIOD * 1000,
-                              usagePendingIntent);
+    scheduleAlarmWithAction(context, alarmManager, 60 * 1000, ActivityMonitor.SCHEDULE_ACTION);
 
-    Intent scheduleIntent = new Intent(context, UsageReceiver.class);
-    scheduleIntent.setAction(ActivityMonitor.SCHEDULE_ACTION);
-    PendingIntent schedulePendingIntent = PendingIntent.getBroadcast(context, 0, scheduleIntent, 0);
+    scheduleAlarmWithAction(context, alarmManager, 5 * 1000, ActivityMonitor.REMOTE_ACTION);
+  }
 
-    alarmManager.cancel(schedulePendingIntent);
-    alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), 5 * 1000,
-                              schedulePendingIntent);
+  private static void scheduleAlarmWithAction(Context context, AlarmManager alarmManager, int periodInSecs,
+                                       String action) {
+    Intent intent = new Intent(context, UsageReceiver.class);
+    intent.setAction(action);
+    PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
 
+    alarmManager.cancel(pendingIntent);
+    alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), periodInSecs,
+                              pendingIntent);
   }
 }

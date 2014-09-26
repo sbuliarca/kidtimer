@@ -39,6 +39,7 @@ public class MainActivity extends ActionBarActivity
     Log.i("" + this, "Created main activ");
 
     setContentView(R.layout.activity_main);
+    StartupReceiver.startTasks(this);
 
     mNavigationDrawerFragment = (NavigationDrawerFragment)
         getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
@@ -53,13 +54,13 @@ public class MainActivity extends ActionBarActivity
   @Override
   protected void onPause() {
     super.onPause();
-    Log.i("" + this, "Paused main activ");
+//    Log.i("" + this, "Paused main activ");
   }
 
   @Override
   protected void onResume() {
     super.onResume();
-    Log.i("" + this, "Resumed main activ");
+//    Log.i("" + this, "Resumed main activ");
   }
 
   @Override

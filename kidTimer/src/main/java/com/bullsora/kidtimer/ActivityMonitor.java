@@ -6,6 +6,17 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
@@ -13,10 +24,11 @@ import java.util.List;
 public class ActivityMonitor {
 
   public static final int TASKS = 1;
-  public static final int SCHEDULE_PERIOD = 1;
+  public static final int SCHEDULE_PERIOD = 2;
   public static final int MAX_USAGE_IN_SEC = 45 * 60 * 60;
   public static final String USAGE_ACTION = "com.android.bullsora.usage";
   public static final String SCHEDULE_ACTION = "com.android.bullsora.schedule";
+  public static final String REMOTE_ACTION = "com.android.bullsora.remote";
 
   private static List<String> EXCLUDED_TASKS = Arrays.asList(
     "com.android.launcher",
@@ -37,6 +49,19 @@ public class ActivityMonitor {
 
   private static boolean hasDataToDump;
   private static int runCycle = 0;
+  private static DefaultHttpClient httpClient = new DefaultHttpClient(new BasicHttpParams());
+
+  public static final HttpGet
+      httpGet = new HttpGet("http://bull-kidtimer.herokuapp.com/override/consume");
+
+  static {
+    httpGet.setHeader("Accept", "application/json");
+  }
+
+  private static Integer overrideMinutes;
+  private static Long overrideStart;
+  private static boolean isOverrideBlock;
+  private static boolean isOverrideAllow;
 
   public static void checkUsage(Context context) {
     ActivityManager
@@ -44,14 +69,18 @@ public class ActivityMonitor {
         (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
     List<ActivityManager.RunningTaskInfo> runningTasks = activityManager.getRunningTasks(TASKS);
     String topTaskPackage = runningTasks.get(0).baseActivity.getPackageName();
-    Log.i("ActivityMonitor", "Top activity is: " + topTaskPackage);
 
     if (EXCLUDED_TASKS.contains(topTaskPackage)) {
       dumpUsage(context);
       return;
     }
 
-    if (blockedOfSchedule) {
+    Log.i("Overrides", "BLock: " + isOverrideBlock + " Allow: " + isOverrideAllow);
+    if (isOverrideAllow) {
+      return;
+    }
+
+    if (isOverrideBlock || blockedOfSchedule || blockedOfUsage) {
       blockUsage(context);
       return;
     }
@@ -70,6 +99,13 @@ public class ActivityMonitor {
       blockedOfUsage = true;
       blockUsage(context);
     }
+  }
+
+  private static void resetOverrides() {
+    overrideMinutes = null;
+    overrideStart = null;
+    isOverrideAllow = false;
+    isOverrideBlock = false;
   }
 
   private static void dumpUsage(Context context) {
@@ -110,5 +146,50 @@ public class ActivityMonitor {
 
     long currentTime = System.currentTimeMillis();
     blockedOfSchedule = currentTime > stopUsageAt && currentTime < resumeUsageAt;
+  }
+
+  public static void checkRemoteManagement() {
+    try {
+      HttpResponse response = httpClient.execute(httpGet);
+
+      String responseString = getString(response.getEntity().getContent());
+      if (responseString.trim().equals("")) {
+        checkOverrideStillActive();
+      } else {
+        setNewOverride(responseString);
+      }
+
+    } catch (Exception e) {
+      Log.e("ActivityMonitor", "Error while fetching the remote overrides", e);
+    }
+  }
+
+  private static void setNewOverride(String responseString) throws JSONException {
+    JSONObject result = new JSONObject(responseString);
+    overrideMinutes = result.getInt("minutes");
+    String overrideType = result.getJSONObject("type").getString("name");
+    isOverrideAllow = overrideType.equals("ALLOW");
+    isOverrideBlock = overrideType.equals("DENY");
+
+    overrideStart = System.currentTimeMillis();
+  }
+
+  private static void checkOverrideStillActive() {
+    if (isOverrideBlock || isOverrideAllow) {
+      long currentTimeMillis = System.currentTimeMillis();
+      if (currentTimeMillis > overrideStart + (overrideMinutes * 60 * 1000)) {
+        resetOverrides();
+      }
+    }
+  }
+
+  private static String getString(InputStream content) throws IOException {
+    BufferedReader r = new BufferedReader(new InputStreamReader(content));
+    StringBuilder total = new StringBuilder();
+    String line;
+    while ((line = r.readLine()) != null) {
+      total.append(line);
+    }
+    return total.toString();
   }
 }
