@@ -124,6 +124,13 @@ public class ActivityMonitor {
     }
 
     Calendar calendar = Calendar.getInstance();
+    int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+    /*  schedule blocking should not be in place in the week-end  */
+    if (dayOfWeek == Calendar.SUNDAY || dayOfWeek == Calendar.SATURDAY) {
+      blockedOfSchedule = false;
+      return;
+    }
+
     calendar.set(Calendar.HOUR_OF_DAY, 8);
     calendar.set(Calendar.MINUTE, 10);
 
