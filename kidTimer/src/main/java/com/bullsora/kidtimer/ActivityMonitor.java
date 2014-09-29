@@ -34,7 +34,9 @@ public class ActivityMonitor {
   private static List<String> EXCLUDED_TASKS = Arrays.asList(
     "com.android.launcher",
     "com.bullsora.kidtimer",
-    "com.nick.kitkatlauncher"
+    "com.nick.kitkatlauncher",
+    "com.cyanogenmod.trebuchet",
+    "com.android.systemui"
   );
 
   private static String LAST_TASK_NAME;
@@ -67,10 +69,10 @@ public class ActivityMonitor {
 
   public static void blockUsageIfNecessary(Context context) {
     String topTaskPackage = getTopTaskPackage(context);
-    Log.i("monitor", "Top package is " + topTaskPackage);
     if (EXCLUDED_TASKS.contains(topTaskPackage)) {
       return;
     }
+    Log.i("monitor", "Top package is " + topTaskPackage);
 
 //    Log.i("Overrides", "BLock: " + isOverrideBlock + " Allow: " + isOverrideAllow);
     if (isOverrideAllow) {
@@ -215,5 +217,17 @@ public class ActivityMonitor {
     if (totalUsage > MAX_USAGE_IN_SEC) {
       blockedOfUsage = true;
     }
+  }
+
+  public static void logOperatingFields() {
+    StringBuilder builder = new StringBuilder();
+    builder.append("\nblock of schedule: ").append(blockedOfSchedule).append("\n");
+    builder.append("totalUsage: ").append(totalUsage).append("\n");
+    builder.append("blocked of usage: ").append(blockedOfUsage).append("\n");
+    builder.append("override : [").append("allow: ").append(isOverrideAllow).append(", deny: ")
+        .append(isOverrideBlock).append(", started at: ").append(overrideStart)
+        .append(", for minutes: ").append(overrideMinutes).append("]\n");
+
+    Log.i("Fields", builder.toString());
   }
 }

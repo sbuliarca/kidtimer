@@ -14,6 +14,7 @@ public class UsageReceiver extends BroadcastReceiver {
 
     if (ActivityMonitor.SCHEDULE_ACTION.equals(action)) {
       ActivityMonitor.checkSchedule();
+      ActivityMonitor.logOperatingFields();
     } else if (ActivityMonitor.BLOCKING_WATCHDOG.equals(action)) {
       ActivityMonitor.blockUsageIfNecessary(context);
     } else if (ActivityMonitor.NEW_DAY_ACTION.equals(action)) {
