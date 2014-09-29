@@ -4,10 +4,14 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.util.Log;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 import org.json.JSONException;
@@ -17,6 +21,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
@@ -219,7 +224,7 @@ public class ActivityMonitor {
     }
   }
 
-  public static void logOperatingFields() {
+  public static void logOperatingFields()  {
     StringBuilder builder = new StringBuilder();
     builder.append("\nblock of schedule: ").append(blockedOfSchedule).append("\n");
     builder.append("totalUsage: ").append(totalUsage).append("\n");
@@ -228,6 +233,20 @@ public class ActivityMonitor {
         .append(isOverrideBlock).append(", started at: ").append(overrideStart)
         .append(", for minutes: ").append(overrideMinutes).append("]\n");
 
-    Log.i("Fields", builder.toString());
+    String message = builder.toString();
+    Log.i("Fields", message);
+
+    try {
+      HttpPost remoteLogHttp = new HttpPost("http://bull-kidtimer.herokuapp.com/logEntry/save");
+      remoteLogHttp.addHeader("Content-type", "application/json");
+      remoteLogHttp.addHeader("Accept", "application/json");
+      remoteLogHttp.setEntity(
+          new StringEntity("{\"class\":\"com.bullsora.kidtimer.LogEntry\",\"message\":\"" + message
+                           + " \"}"));
+      HttpResponse response = httpClient.execute(remoteLogHttp);
+      response.getEntity().consumeContent();
+    } catch (Exception e) {
+       // do nothing here
+    }
   }
 }
