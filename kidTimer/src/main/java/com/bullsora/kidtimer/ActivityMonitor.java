@@ -4,13 +4,11 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.util.Log;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
@@ -21,7 +19,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
@@ -29,7 +26,7 @@ import java.util.List;
 public class ActivityMonitor {
 
   public static final int USAGE_TRACKING_PERIOD = 10;
-  public static final int MAX_USAGE_IN_SEC = 45 * 60 * 60;
+  public static final int MAX_USAGE_IN_SEC = 45 * 60 ;
   public static final String BLOCKING_WATCHDOG = "com.android.bullsora.blockUsage";
   public static final String SCHEDULE_ACTION = "com.android.bullsora.schedule";
   public static final String REMOTE_ACTION = "com.android.bullsora.remote";
@@ -141,14 +138,23 @@ public class ActivityMonitor {
     calendar.set(Calendar.HOUR_OF_DAY, 8);
     calendar.set(Calendar.MINUTE, 10);
 
-    long stopUsageAt = calendar.getTimeInMillis();
+    long leaveInTheMorning = calendar.getTimeInMillis();
 
     calendar.set(Calendar.HOUR_OF_DAY, 15);
     calendar.set(Calendar.MINUTE, 0);
-    long resumeUsageAt = calendar.getTimeInMillis();
+    long afterSchool = calendar.getTimeInMillis();
+
+    calendar.set(Calendar.HOUR_OF_DAY, 21);
+    calendar.set(Calendar.MINUTE, 45);
+    long bedTime = calendar.getTimeInMillis();
+
+    /*  sleep for at least 8 hours. */
+    calendar.set(Calendar.HOUR_OF_DAY, 7);
+    calendar.set(Calendar.MINUTE, 30);
+    long upInTheMorning = calendar.getTimeInMillis();
 
     long currentTime = System.currentTimeMillis();
-    blockedOfSchedule = currentTime > stopUsageAt && currentTime < resumeUsageAt;
+    blockedOfSchedule = (currentTime > leaveInTheMorning && currentTime < afterSchool) || (currentTime < upInTheMorning) || (currentTime > bedTime);
   }
 
   public static void checkRemoteManagement() {
