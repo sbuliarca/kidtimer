@@ -24,7 +24,7 @@ public class StartupReceiver extends BroadcastReceiver {
     /*  schedule usage watchdog for 2 secs */
     Calendar calendar = Calendar.getInstance();
     long currentTime = calendar.getTimeInMillis();
-    scheduleAlarmWithAction(context, alarmManager, 2 * 1000,
+    scheduleAlarmWithAction(context, alarmManager, 1000,
                             ActivityMonitor.BLOCKING_WATCHDOG, currentTime);
 
     /*  schedule usage tracking for 10 secs */

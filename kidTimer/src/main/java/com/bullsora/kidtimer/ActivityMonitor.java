@@ -32,6 +32,7 @@ public class ActivityMonitor {
   public static final String REMOTE_ACTION = "com.android.bullsora.remote";
   public static final String NEW_DAY_ACTION = "com.android.bullsora.newDay";
   public static final String TRACK_USAGE = "com.android.bullsora.trackUsage";
+  public static final int MISSING_VALUE_MARKER = -1;
 
   private static List<String> EXCLUDED_TASKS = Arrays.asList(
     "com.android.launcher",
@@ -44,6 +45,8 @@ public class ActivityMonitor {
   private static String LAST_TASK_NAME;
 
   private static int LAST_TASK_USAGE = 0;
+
+  private static boolean shouldReloadFromPrefs = true;
 
   private static boolean blockedOfSchedule;
 
@@ -71,6 +74,11 @@ public class ActivityMonitor {
 
   public static void blockUsageIfNecessary(Context context) {
     String topTaskPackage = getTopTaskPackage(context);
+    if (shouldReloadFromPrefs) {
+      restoreState(context);
+      shouldReloadFromPrefs = false;
+    }
+
     if (EXCLUDED_TASKS.contains(topTaskPackage)) {
       return;
     }
@@ -86,6 +94,46 @@ public class ActivityMonitor {
     }
   }
 
+  private static void backupState(Context context) {
+    SharedPreferences.Editor editor = getLocalPrefs(context).edit();
+    editor.putBoolean("blockOfSchedule", blockedOfSchedule);
+    editor.putBoolean("blockOfUsage", blockedOfUsage);
+    editor.putBoolean("isOverrideAllow", isOverrideAllow);
+    editor.putBoolean("isOverrideBlock", isOverrideBlock);
+    if (overrideStart != null) {
+      editor.putLong("overrideStart", overrideStart);
+    } else {
+      editor.remove("overrideStart");
+    }
+    if (overrideMinutes != null) {
+      editor.putInt("overrideMinutes", overrideMinutes);
+    } else {
+      editor.remove("overrideMinutes");
+    }
+
+    editor.commit();
+  }
+
+  private static void restoreState(Context context) {
+    Log.i("inf", "Restoring state from prefs");
+    SharedPreferences localPrefs = getLocalPrefs(context);
+
+    blockedOfSchedule = localPrefs.getBoolean("blockOfSchedule", false);
+    blockedOfUsage = localPrefs.getBoolean("blockOfUsage", false);
+    isOverrideAllow = localPrefs.getBoolean("isOverrideAllow", false);
+    isOverrideBlock = localPrefs.getBoolean("isOverrideBlock", false);
+    totalUsage = localPrefs.getInt("totalUsage", 0);
+    long overrideStartVal = localPrefs.getLong("overrideStart", MISSING_VALUE_MARKER);
+    if (overrideStartVal != MISSING_VALUE_MARKER) {
+      overrideStart = overrideStartVal;
+    }
+
+    int overrideMinutesVal = localPrefs.getInt("overrideMinutes", MISSING_VALUE_MARKER);
+    if (overrideMinutesVal != MISSING_VALUE_MARKER) {
+      overrideMinutes = overrideMinutesVal;
+    }
+  }
+
   private static String getTopTaskPackage(Context context) {
     ActivityManager
         activityManager =
@@ -94,29 +142,36 @@ public class ActivityMonitor {
     return runningTasks.get(0).baseActivity.getPackageName();
   }
 
-  private static void resetOverrides() {
+  private static void resetOverrides(Context context) {
     overrideMinutes = null;
     overrideStart = null;
     isOverrideAllow = false;
     isOverrideBlock = false;
+    backupState(context);
   }
 
   private static void dumpUsage(Context context) {
     if (!hasDataToDump) {
       return;
     }
-
-    SharedPreferences usage = context.getSharedPreferences("Usage", 0);
-    SharedPreferences.Editor usageEditor = usage.edit();
-    usageEditor.putFloat("total", totalUsage);
+    SharedPreferences.Editor usageEditor = getLocalPrefs(context).edit();
+    usageEditor.putInt("totalUsage", totalUsage);
     usageEditor.commit();
     hasDataToDump = false;
+  }
+
+  private static SharedPreferences getLocalPrefs(Context context) {
+    return context.getSharedPreferences("kid-timer", Context.MODE_PRIVATE);
   }
 
 
   public static void blockUsage(Context context) {
     Intent intent = new Intent(context, MainActivity.class);
-    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    intent.setAction(Intent.ACTION_MAIN);
+    intent.addCategory(Intent.CATEGORY_LAUNCHER);
+
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
 
     context.startActivity(intent);
   }
@@ -157,15 +212,15 @@ public class ActivityMonitor {
     blockedOfSchedule = (currentTime > leaveInTheMorning && currentTime < afterSchool) || (currentTime < upInTheMorning) || (currentTime > bedTime);
   }
 
-  public static void checkRemoteManagement() {
+  public static void checkRemoteManagement(Context context) {
     try {
       HttpResponse response = httpClient.execute(httpGet);
 
       String responseString = getString(response.getEntity().getContent());
       if (responseString.trim().equals("")) {
-        checkOverrideStillActive();
+        checkOverrideStillActive(context);
       } else {
-        setNewOverride(responseString);
+        setNewOverride(responseString, context);
       }
 
     } catch (Exception e) {
@@ -173,7 +228,7 @@ public class ActivityMonitor {
     }
   }
 
-  private static void setNewOverride(String responseString) throws JSONException {
+  private static void setNewOverride(String responseString, Context context) throws JSONException {
     JSONObject result = new JSONObject(responseString);
     overrideMinutes = result.getInt("minutes");
     String overrideType = result.getJSONObject("type").getString("name");
@@ -181,13 +236,14 @@ public class ActivityMonitor {
     isOverrideBlock = overrideType.equals("DENY");
 
     overrideStart = System.currentTimeMillis();
+    backupState(context);
   }
 
-  private static void checkOverrideStillActive() {
+  private static void checkOverrideStillActive(Context context) {
     if (isOverrideBlock || isOverrideAllow) {
       long currentTimeMillis = System.currentTimeMillis();
       if (currentTimeMillis > overrideStart + (overrideMinutes * 60 * 1000)) {
-        resetOverrides();
+        resetOverrides(context);
       }
     }
   }
@@ -202,9 +258,10 @@ public class ActivityMonitor {
     return total.toString();
   }
 
-  public static void resetUsage() {
+  public static void resetUsage(Context context) {
     totalUsage = 0;
     blockedOfUsage = false;
+    backupState(context);
   }
 
   public static void trackUsage(Context context) {
@@ -227,6 +284,7 @@ public class ActivityMonitor {
 
     if (totalUsage > MAX_USAGE_IN_SEC) {
       blockedOfUsage = true;
+      backupState(context);
     }
   }
 

@@ -18,20 +18,20 @@ public class UsageReceiver extends BroadcastReceiver {
     } else if (ActivityMonitor.BLOCKING_WATCHDOG.equals(action)) {
       ActivityMonitor.blockUsageIfNecessary(context);
     } else if (ActivityMonitor.NEW_DAY_ACTION.equals(action)) {
-      ActivityMonitor.resetUsage();
+      ActivityMonitor.resetUsage(context);
     } else if (ActivityMonitor.REMOTE_ACTION.equals(action)) {
       AsyncRemoteCheck asyncCheck = new AsyncRemoteCheck();
-      asyncCheck.execute("");
+      asyncCheck.execute(context);
     } else if (ActivityMonitor.TRACK_USAGE.equals(action)) {
       ActivityMonitor.trackUsage(context);
     }
   }
 
-  private class AsyncRemoteCheck extends AsyncTask<String, Void, Void> {
+  private class AsyncRemoteCheck extends AsyncTask<Context, Void, Void> {
 
     @Override
-    protected Void doInBackground(String... params) {
-      ActivityMonitor.checkRemoteManagement();
+    protected Void doInBackground(Context... params) {
+      ActivityMonitor.checkRemoteManagement(params[0]);
       return null;
     }
   }
