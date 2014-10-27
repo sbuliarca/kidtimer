@@ -100,6 +100,8 @@ public class ActivityMonitor {
     editor.putBoolean("blockOfUsage", blockedOfUsage);
     editor.putBoolean("isOverrideAllow", isOverrideAllow);
     editor.putBoolean("isOverrideBlock", isOverrideBlock);
+    editor.putInt("totalUsage", totalUsage);
+
     if (overrideStart != null) {
       editor.putLong("overrideStart", overrideStart);
     } else {
@@ -151,9 +153,6 @@ public class ActivityMonitor {
   }
 
   private static void dumpUsage(Context context) {
-    if (!hasDataToDump) {
-      return;
-    }
     SharedPreferences.Editor usageEditor = getLocalPrefs(context).edit();
     usageEditor.putInt("totalUsage", totalUsage);
     usageEditor.commit();
@@ -268,19 +267,12 @@ public class ActivityMonitor {
     String topTaskPackage = getTopTaskPackage(context);
 
     if (EXCLUDED_TASKS.contains(topTaskPackage)) {
-      dumpUsage(context);
       return;
     }
 
-    runCycle++;
     totalUsage += USAGE_TRACKING_PERIOD;
-    hasDataToDump = true;
+    dumpUsage(context);
 //    Log.i("Manager", "Total usage " + totalUsage);
-
-    if (runCycle == DUMP_USAGE_STATS_CYCLES) {
-      dumpUsage(context);
-      runCycle = 0;
-    }
 
     if (totalUsage > MAX_USAGE_IN_SEC) {
       blockedOfUsage = true;
