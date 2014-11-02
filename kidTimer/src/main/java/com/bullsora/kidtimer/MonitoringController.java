@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
-public class ActivityMonitor {
+public class MonitoringController {
 
   public static final int USAGE_TRACKING_PERIOD = 10;
   public static final int MAX_USAGE_IN_SEC = 45 * 60 ;
@@ -54,10 +54,6 @@ public class ActivityMonitor {
 
   private static int totalUsage = 0;
 
-  private static final int DUMP_USAGE_STATS_CYCLES = 60;
-
-  private static boolean hasDataToDump;
-  private static int runCycle = 0;
   private static DefaultHttpClient httpClient = new DefaultHttpClient(new BasicHttpParams());
 
   public static final HttpGet
@@ -156,7 +152,6 @@ public class ActivityMonitor {
     SharedPreferences.Editor usageEditor = getLocalPrefs(context).edit();
     usageEditor.putInt("totalUsage", totalUsage);
     usageEditor.commit();
-    hasDataToDump = false;
   }
 
   private static SharedPreferences getLocalPrefs(Context context) {
@@ -272,7 +267,7 @@ public class ActivityMonitor {
 
     totalUsage += USAGE_TRACKING_PERIOD;
     dumpUsage(context);
-//    Log.i("Manager", "Total usage " + totalUsage);
+    Log.i("Manager", "Total usage " + totalUsage);
 
     if (totalUsage > MAX_USAGE_IN_SEC) {
       blockedOfUsage = true;

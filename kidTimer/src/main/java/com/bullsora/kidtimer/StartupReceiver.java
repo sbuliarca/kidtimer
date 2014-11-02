@@ -25,18 +25,18 @@ public class StartupReceiver extends BroadcastReceiver {
     Calendar calendar = Calendar.getInstance();
     long currentTime = calendar.getTimeInMillis();
     scheduleAlarmWithAction(context, alarmManager, 1000,
-                            ActivityMonitor.BLOCKING_WATCHDOG, currentTime);
+                            MonitoringController.BLOCKING_WATCHDOG, currentTime);
 
     /*  schedule usage tracking for 10 secs */
-    scheduleAlarmWithAction(context, alarmManager, ActivityMonitor.USAGE_TRACKING_PERIOD * 1000,
-                            ActivityMonitor.TRACK_USAGE, currentTime);
+    scheduleAlarmWithAction(context, alarmManager, MonitoringController.USAGE_TRACKING_PERIOD * 1000,
+                            MonitoringController.TRACK_USAGE, currentTime);
 
     /*  schedule "scheduled" usage for 1 minute */
-    scheduleAlarmWithAction(context, alarmManager, 60 * 1000, ActivityMonitor.SCHEDULE_ACTION,
+    scheduleAlarmWithAction(context, alarmManager, 60 * 1000, MonitoringController.SCHEDULE_ACTION,
                             currentTime);
 
     /*  schedule remote management for 5 secs */
-    scheduleAlarmWithAction(context, alarmManager, 5 * 1000, ActivityMonitor.REMOTE_ACTION,
+    scheduleAlarmWithAction(context, alarmManager, 5 * 1000, MonitoringController.REMOTE_ACTION,
                             currentTime);
 
 
@@ -45,13 +45,13 @@ public class StartupReceiver extends BroadcastReceiver {
     calendar.set(Calendar.MINUTE, 0);
     calendar.set(Calendar.SECOND, 0);
     scheduleAlarmWithAction(context, alarmManager, 24 * 60 * 60 * 1000,
-                            ActivityMonitor.NEW_DAY_ACTION, calendar.getTimeInMillis());
+                            MonitoringController.NEW_DAY_ACTION, calendar.getTimeInMillis());
   }
 
   private static void scheduleAlarmWithAction(Context context, AlarmManager alarmManager,
                                               int periodInSecs,
                                               String action, long startingTime) {
-    Intent intent = new Intent(context, UsageReceiver.class);
+    Intent intent = new Intent(context, ScheduledActionsReceiver.class);
     intent.setAction(action);
     PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
 

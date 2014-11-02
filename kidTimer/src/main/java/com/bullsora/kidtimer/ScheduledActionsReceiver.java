@@ -5,25 +5,25 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 
-public class UsageReceiver extends BroadcastReceiver {
+public class ScheduledActionsReceiver extends BroadcastReceiver {
 
 
   @Override
   public void onReceive(Context context, Intent intent) {
     String action = intent.getAction();
 
-    if (ActivityMonitor.SCHEDULE_ACTION.equals(action)) {
-      ActivityMonitor.checkSchedule();
+    if (MonitoringController.SCHEDULE_ACTION.equals(action)) {
+      MonitoringController.checkSchedule();
       new AsyncRemoteLog().execute("");
-    } else if (ActivityMonitor.BLOCKING_WATCHDOG.equals(action)) {
-      ActivityMonitor.blockUsageIfNecessary(context);
-    } else if (ActivityMonitor.NEW_DAY_ACTION.equals(action)) {
-      ActivityMonitor.resetUsage(context);
-    } else if (ActivityMonitor.REMOTE_ACTION.equals(action)) {
+    } else if (MonitoringController.BLOCKING_WATCHDOG.equals(action)) {
+      MonitoringController.blockUsageIfNecessary(context);
+    } else if (MonitoringController.NEW_DAY_ACTION.equals(action)) {
+      MonitoringController.resetUsage(context);
+    } else if (MonitoringController.REMOTE_ACTION.equals(action)) {
       AsyncRemoteCheck asyncCheck = new AsyncRemoteCheck();
       asyncCheck.execute(context);
-    } else if (ActivityMonitor.TRACK_USAGE.equals(action)) {
-      ActivityMonitor.trackUsage(context);
+    } else if (MonitoringController.TRACK_USAGE.equals(action)) {
+      MonitoringController.trackUsage(context);
     }
   }
 
@@ -31,7 +31,7 @@ public class UsageReceiver extends BroadcastReceiver {
 
     @Override
     protected Void doInBackground(Context... params) {
-      ActivityMonitor.checkRemoteManagement(params[0]);
+      MonitoringController.checkRemoteManagement(params[0]);
       return null;
     }
   }
@@ -40,7 +40,7 @@ public class UsageReceiver extends BroadcastReceiver {
 
     @Override
     protected Void doInBackground(String... params) {
-      ActivityMonitor.logOperatingFields();
+      MonitoringController.logOperatingFields();
       return null;
     }
   }

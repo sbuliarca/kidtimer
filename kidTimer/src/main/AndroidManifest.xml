@@ -22,7 +22,7 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".UsageReceiver">
+        <receiver android:name=".ScheduledActionsReceiver">
             <intent-filter>
                 <action android:name="com.android.bullsora.blockUsage"/>
                 <action android:name="com.android.bullsora.schedule"/>
