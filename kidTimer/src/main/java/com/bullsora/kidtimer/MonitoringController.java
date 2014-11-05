@@ -90,7 +90,7 @@ public class MonitoringController {
     }
   }
 
-  private static void backupState(Context context) {
+  private synchronized static void backupState(Context context) {
     SharedPreferences.Editor editor = getLocalPrefs(context).edit();
     editor.putBoolean("blockOfSchedule", blockedOfSchedule);
     editor.putBoolean("blockOfUsage", blockedOfUsage);
@@ -112,7 +112,7 @@ public class MonitoringController {
     editor.commit();
   }
 
-  private static void restoreState(Context context) {
+  private synchronized static void restoreState(Context context) {
     Log.i("inf", "Restoring state from prefs");
     SharedPreferences localPrefs = getLocalPrefs(context);
 
@@ -140,7 +140,7 @@ public class MonitoringController {
     return runningTasks.get(0).baseActivity.getPackageName();
   }
 
-  private static void resetOverrides(Context context) {
+  private static synchronized void resetOverrides(Context context) {
     overrideMinutes = null;
     overrideStart = null;
     isOverrideAllow = false;
@@ -148,7 +148,7 @@ public class MonitoringController {
     backupState(context);
   }
 
-  private static void dumpUsage(Context context) {
+  private static synchronized void dumpUsage(Context context) {
     SharedPreferences.Editor usageEditor = getLocalPrefs(context).edit();
     usageEditor.putInt("totalUsage", totalUsage);
     usageEditor.commit();
@@ -252,7 +252,7 @@ public class MonitoringController {
     return total.toString();
   }
 
-  public static void resetUsage(Context context) {
+  public static synchronized void resetUsage(Context context) {
     totalUsage = 0;
     blockedOfUsage = false;
     backupState(context);
