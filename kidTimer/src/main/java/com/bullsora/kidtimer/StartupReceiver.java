@@ -21,6 +21,7 @@ public class StartupReceiver extends BroadcastReceiver {
   public static void startTasks(Context context) {
     AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
+    Log.i("Startup", "Scheduling alarms");
     /*  schedule usage watchdog for 2 secs */
     Calendar calendar = Calendar.getInstance();
     long currentTime = calendar.getTimeInMillis();
@@ -41,6 +42,7 @@ public class StartupReceiver extends BroadcastReceiver {
 
 
     /*  schedule the new day action at 0:00 each day  */
+    calendar.add(Calendar.DAY_OF_MONTH, 1);
     calendar.set(Calendar.HOUR_OF_DAY, 0);
     calendar.set(Calendar.MINUTE, 0);
     calendar.set(Calendar.SECOND, 0);
@@ -49,14 +51,14 @@ public class StartupReceiver extends BroadcastReceiver {
   }
 
   private static void scheduleAlarmWithAction(Context context, AlarmManager alarmManager,
-                                              int periodInSecs,
+                                              int periodInMillis,
                                               String action, long startingTime) {
     Intent intent = new Intent(context, ScheduledActionsReceiver.class);
     intent.setAction(action);
     PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
 
     alarmManager.cancel(pendingIntent);
-    alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, startingTime, periodInSecs,
+    alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, startingTime, periodInMillis,
                               pendingIntent);
   }
 }

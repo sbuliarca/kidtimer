@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public class MonitoringController {
@@ -78,7 +79,7 @@ public class MonitoringController {
     if (EXCLUDED_TASKS.contains(topTaskPackage)) {
       return;
     }
-    Log.i("monitor", "Top package is " + topTaskPackage);
+//    Log.i("monitor", "Top package is " + topTaskPackage);
 
 //    Log.i("Overrides", "BLock: " + isOverrideBlock + " Allow: " + isOverrideAllow);
     if (isOverrideAllow) {
@@ -91,11 +92,18 @@ public class MonitoringController {
   }
 
   private synchronized static void backupState(Context context) {
+    if (shouldReloadFromPrefs) {
+      restoreState(context);
+      shouldReloadFromPrefs = false;
+      return;
+    }
+
     SharedPreferences.Editor editor = getLocalPrefs(context).edit();
     editor.putBoolean("blockOfSchedule", blockedOfSchedule);
     editor.putBoolean("blockOfUsage", blockedOfUsage);
     editor.putBoolean("isOverrideAllow", isOverrideAllow);
     editor.putBoolean("isOverrideBlock", isOverrideBlock);
+    Log.i("Usage", "Backing up total usage: " + totalUsage);
     editor.putInt("totalUsage", totalUsage);
 
     if (overrideStart != null) {
@@ -253,6 +261,7 @@ public class MonitoringController {
   }
 
   public static synchronized void resetUsage(Context context) {
+    Log.i("Usage", "Resetting usage to 0");
     totalUsage = 0;
     blockedOfUsage = false;
     backupState(context);
@@ -278,10 +287,10 @@ public class MonitoringController {
   public static void logOperatingFields()  {
     StringBuilder builder = new StringBuilder();
     builder.append("\nblock of schedule: ").append(blockedOfSchedule).append("\n");
-    builder.append("totalUsage: ").append(totalUsage).append("\n");
+    builder.append("totalUsage: ").append(totalUsage/60).append(" mins\n");
     builder.append("blocked of usage: ").append(blockedOfUsage).append("\n");
     builder.append("override : [").append("allow: ").append(isOverrideAllow).append(", deny: ")
-        .append(isOverrideBlock).append(", started at: ").append(overrideStart)
+        .append(isOverrideBlock).append(", started at: ").append(new Date(overrideStart))
         .append(", for minutes: ").append(overrideMinutes).append("]\n");
 
     String message = builder.toString();
