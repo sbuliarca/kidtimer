@@ -286,11 +286,16 @@ public class MonitoringController {
 
   public static void logOperatingFields()  {
     StringBuilder builder = new StringBuilder();
+    Date overrideStartDate = null;
+    if (overrideStart != null) {
+      overrideStartDate = new Date(MonitoringController.overrideStart);
+    }
+
     builder.append("\nblock of schedule: ").append(blockedOfSchedule).append("\n");
     builder.append("totalUsage: ").append(totalUsage/60).append(" mins\n");
     builder.append("blocked of usage: ").append(blockedOfUsage).append("\n");
     builder.append("override : [").append("allow: ").append(isOverrideAllow).append(", deny: ")
-        .append(isOverrideBlock).append(", started at: ").append(new Date(overrideStart))
+        .append(isOverrideBlock).append(", started at: ").append(overrideStartDate)
         .append(", for minutes: ").append(overrideMinutes).append("]\n");
 
     String message = builder.toString();
