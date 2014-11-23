@@ -179,7 +179,7 @@ public class MonitoringController {
   }
 
 
-  public static void checkSchedule(Context context) {
+  public static void adjustBlockingBasedOnSchedule(Context context) {
     if (blockedOfUsage) {
       return;
     }
@@ -264,14 +264,14 @@ public class MonitoringController {
     return total.toString();
   }
 
-  public static synchronized void resetUsage(Context context) {
+  public static synchronized void resetUsageCouter(Context context) {
     Log.i("Usage", "Resetting usage to 0");
     totalUsage = 0;
     blockedOfUsage = false;
     backupState(context);
   }
 
-  public static void trackUsage(Context context) {
+  public static void adjustBlockingBasedOnUsage(Context context) {
     String topTaskPackage = getTopTaskPackage(context);
 
     if (EXCLUDED_TASKS.contains(topTaskPackage)) {

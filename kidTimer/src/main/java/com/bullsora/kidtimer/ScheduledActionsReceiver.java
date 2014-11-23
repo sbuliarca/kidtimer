@@ -13,17 +13,17 @@ public class ScheduledActionsReceiver extends BroadcastReceiver {
     String action = intent.getAction();
 
     if (MonitoringController.SCHEDULE_ACTION.equals(action)) {
-      MonitoringController.checkSchedule(context);
+      MonitoringController.adjustBlockingBasedOnSchedule(context);
       new AsyncRemoteLog().execute("");
     } else if (MonitoringController.BLOCKING_WATCHDOG.equals(action)) {
       MonitoringController.blockUsageIfNecessary(context);
     } else if (MonitoringController.NEW_DAY_ACTION.equals(action)) {
-      MonitoringController.resetUsage(context);
+      MonitoringController.resetUsageCouter(context);
     } else if (MonitoringController.REMOTE_ACTION.equals(action)) {
       AsyncRemoteCheck asyncCheck = new AsyncRemoteCheck();
       asyncCheck.execute(context);
     } else if (MonitoringController.TRACK_USAGE.equals(action)) {
-      MonitoringController.trackUsage(context);
+      MonitoringController.adjustBlockingBasedOnUsage(context);
     }
   }
 
