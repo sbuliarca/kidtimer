@@ -179,7 +179,7 @@ public class MonitoringController {
   }
 
 
-  public static void checkSchedule() {
+  public static void checkSchedule(Context context) {
     if (blockedOfUsage) {
       return;
     }
@@ -210,8 +210,12 @@ public class MonitoringController {
     calendar.set(Calendar.MINUTE, 30);
     long upInTheMorning = calendar.getTimeInMillis();
 
+    boolean initialBlockedOfScheduleValue = blockedOfSchedule;
     long currentTime = System.currentTimeMillis();
     blockedOfSchedule = (currentTime > leaveInTheMorning && currentTime < afterSchool) || (currentTime < upInTheMorning) || (currentTime > bedTime);
+    if (initialBlockedOfScheduleValue != blockedOfSchedule) {
+      backupState(context);
+    }
   }
 
   public static void checkRemoteManagement(Context context) {
