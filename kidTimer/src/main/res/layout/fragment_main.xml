@@ -18,8 +18,8 @@
             android:id="@+id/imageView"
             android:layout_below="@+id/section_label"
             android:layout_toRightOf="@+id/section_label"
-            android:src="@drawable/birds"
-            android:contentDescription="birds sleeping" android:layout_alignParentBottom="true"
+            android:src="@drawable/sleepy_dog"
+            android:contentDescription="sleeping" android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"/>
 
 </RelativeLayout>
